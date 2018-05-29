@@ -2,7 +2,7 @@
 
 App Android utilizado para acionamento de lâmpadas inteligentes conectadas à internet, a interface entre o App e as mesmas é feita por meio de um banco de dados Firebase.
 
-Um dispositivo utilizando ESP8266 está sendo construído para ser a interface entre o banco de dados e as lâmpadas em qeustão.
+Um dispositivo utilizando ESP8266 está sendo construído para dar à lâmpada o caráter 'inteligente'.
 
 ## Motivação
 
