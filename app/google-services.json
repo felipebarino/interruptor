@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "652588387791",
+    "firebase_url": "https://interuptor-207fe.firebaseio.com",
+    "project_id": "interuptor-207fe",
+    "storage_bucket": "interuptor-207fe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:652588387791:android:c2a2fea09ccc5934",
+        "android_client_info": {
+          "package_name": "com.example.felipebarino.firebaseauthdemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "652588387791-e0d1qnp18q1eipi6bf6k4pmv2uvv2vbm.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "652588387791-e0d1qnp18q1eipi6bf6k4pmv2uvv2vbm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpxG_EhrjlMLbJ18OJspbCWzSSsZxI4Qs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
