@@ -17,6 +17,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -35,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
-    private DatabaseReference userDatabase;
+    private DatabaseReference infoDatabase;
     private FirebaseUser user;
 
     public UserInformation userInformation;
@@ -75,29 +78,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String name = userInformation.getName();
         String lastname = userInformation.getLastname();
 
-        // se não for vazio -> salva no banco de dados
+        // se não for vazio -> entra
         if( !(TextUtils.isEmpty(name) && TextUtils.isEmpty(lastname)) ) {
-            //tenta fazer log in
-            // *** falta fazer Toast expecifico para cada tipo de erro que pode ocorrer
+            //tenta fazer log in, para acessar seu banco de dados
             firebaseAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
-                                // salva nome e sobrenome no banco de dados
+                                // se conseguir
                                 // pega quem é o usuário logado
                                 FirebaseUser user = firebaseAuth.getCurrentUser();
                                 // seta as informações para ele
-                                userDatabase = databaseReference.child(user.getUid());
-                                userDatabase.setValue(userInformation);
-                                Log.d("MainActivity", "userRegistration:added");
+                                infoDatabase = databaseReference.child(user.getUid()).child("info");
+                                // salva nome e sobrenome no banco de dados
+                                infoDatabase.setValue(userInformation);
+                                Log.d("MainActivity", "UserLogin: success");
                                 // vai para a atividade primária
                                 finish();
                                 startActivity(new Intent(getApplicationContext(), PrimaryActivity.class));
                             }else{
-                                if(progressDialog.isShowing()) progressDialog.dismiss();
-                                Log.w("MainActivity", "UserLogin:failure", task.getException());
-                                Toast.makeText(MainActivity.this, "Falha ao fazer Login", Toast.LENGTH_SHORT).show();
+                                Log.w("MainActivity", "UserLogin: failure", task.getException());if(progressDialog.isShowing()) progressDialog.dismiss();
+                                Toast.makeText(MainActivity.this, "Falha ao entrar", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
@@ -125,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         progressDialog.setMessage("Registrando usuário...");
         progressDialog.show();
         // registra o usuário
-        // *** falta fazer Toast expecifico para cada tipo de erro que pode ocorrer
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -133,11 +134,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if(task.isSuccessful()){
                             if(progressDialog.isShowing()) progressDialog.dismiss();
                             Log.d("MainActivity", "createUser:success");
+                            // salva as informações no banco de dados
                             saveUserInformation(userInformation, email, password);
                         }else{
                             if(progressDialog.isShowing()) progressDialog.dismiss();
                             Log.w("MainActivity", "createUser:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Registo falhou, tente novamente.", Toast.LENGTH_SHORT).show();
+                            // Lida com os erros:
+                            if(task.getException() instanceof FirebaseAuthUserCollisionException){
+                                Toast.makeText(MainActivity.this, "E-mail já cadastrado", Toast.LENGTH_SHORT).show();
+                            }else if(task.getException() instanceof FirebaseAuthInvalidCredentialsException){
+                                Toast.makeText(MainActivity.this, "Favor checar o E-mail digitado", Toast.LENGTH_SHORT).show();
+                            }else if(task.getException() instanceof FirebaseAuthWeakPasswordException){
+                                Toast.makeText(MainActivity.this, "A senha deve ter pelo menos seis caracteres", Toast.LENGTH_SHORT).show();
+                            }else{
+                                Toast.makeText(MainActivity.this, "Falha ao registrar", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
                 });

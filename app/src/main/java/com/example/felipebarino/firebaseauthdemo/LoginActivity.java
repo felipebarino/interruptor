@@ -82,7 +82,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             startActivity(new Intent(getApplicationContext(), PrimaryActivity.class));
                         }else{
                             Log.w("LoginActivity", "UserLogin:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Falha ao fazer Login", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Falha ao entrar", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

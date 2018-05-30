@@ -2,14 +2,16 @@ package com.example.felipebarino.firebaseauthdemo;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -19,20 +21,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class PrimaryActivity extends AppCompatActivity implements View.OnClickListener {
+public class PrimaryActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
-
-    private Button buttonLogout;
+    private NavigationView navigationView;
     private TextView textViewUser;
+    private ListView listView;
 
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference databaseReference;
-    private DatabaseReference userDatabase;
     private FirebaseUser user;
+    private DatabaseReference databaseReference, userDatabase, infoDatabase, devicesDatabase;
 
     private UserInformation userInformation;
+    private UserDevice userDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,10 +48,15 @@ public class PrimaryActivity extends AppCompatActivity implements View.OnClickLi
         drawerToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        listView = (ListView) findViewById(R.id.listview);
+
         // instancia o autorizador do firebase e vê se tem alguém logado
         // se não, vai pra tela de login
         firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = firebaseAuth.getCurrentUser();
+        user = firebaseAuth.getCurrentUser();
         if(user == null){
             finish();
             startActivity(new Intent(this, LoginActivity.class));
@@ -57,35 +64,45 @@ public class PrimaryActivity extends AppCompatActivity implements View.OnClickLi
 
         // pega o banco de dados
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        // pega o banco de dados do usuário
+        // pega o banco de dados do usuário, informações e dispositivos
         userDatabase = databaseReference.child(user.getUid());
+        infoDatabase = userDatabase.child("info");
+        devicesDatabase = userDatabase.child("devices");
 
         userInformation = new UserInformation("name", "lastname");
-        Log.d("PrimaryActivity:\t", "userInfo:\n\r\tname:\t\t" +
-                userInformation.getName() + " \n\r\tlastname:\t" + userInformation.getLastname());
+        userDevice = new UserDevice("000","nick", "OFF");
 
-        userDatabase.addValueEventListener(new ValueEventListener() {
+        // callback para mudanças nas informações do usuário
+        infoDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                // quando atualiza as informações do usuário
                 userInformation.setName(dataSnapshot.child("name").getValue().toString().trim());
                 userInformation.setLastname(dataSnapshot.child("lastname").getValue().toString().trim());
                 Log.d("PrimaryActivity:\t", "onDataChange:\n\r\tname:\t\t" +
-                        userInformation.getName() + " \n\r\tlastname:\t" + userInformation.getLastname());
+                        dataSnapshot.child("name").getValue().toString().trim() + " \n\r\tlastname:\t" + dataSnapshot.child("lastname").getValue().toString().trim());
                 textViewUser = (TextView) findViewById(R.id.textViewUser);
                 textViewUser.setText("Olá, " + userInformation.getName() );
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.e("PrimaryActivity:\t", "infoDatabase: onDataChange:\n\rcould not get new data");
             }
         });
 
+        // callback para mudanças nas informações de dispositivos
+        devicesDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // quando atualiza as informações de dispositivos
+            }
 
-        //textViewUser.setText(userInformation.getName());
-
-        buttonLogout = (Button) findViewById(R.id.buttonLogout);
-        buttonLogout.setOnClickListener(this);
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("PrimaryActivity:\t", "devicesDatabase: onDataChange:\n\rcould not get new data");
+            }
+        });
     }
 
 
@@ -98,13 +115,23 @@ public class PrimaryActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     @Override
-    public void onClick(View view) {
-        if(view == buttonLogout){
-            // tela de logar
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if(id == R.id.nav_account)
+        {
+            Toast.makeText(this, "Minha conta", Toast.LENGTH_SHORT).show();
+        }
+        if(id == R.id.nav_settings)
+        {
+            Toast.makeText(this, "Configurações", Toast.LENGTH_SHORT).show();
+        }
+        if(id == R.id.nav_logout)
+        {
             firebaseAuth.signOut();
             finish();
             startActivity(new Intent(this, LoginActivity.class));
-
         }
+        return false;
     }
 }
