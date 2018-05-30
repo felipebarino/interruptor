@@ -1,31 +1,31 @@
 {
   "project_info": {
-    "project_number": "652588387791",
-    "firebase_url": "https://interuptor-207fe.firebaseio.com",
-    "project_id": "interuptor-207fe",
-    "storage_bucket": "interuptor-207fe.appspot.com"
+    "project_number": "264849437645",
+    "firebase_url": "https://interruptor-d1695.firebaseio.com",
+    "project_id": "interruptor-d1695",
+    "storage_bucket": "interruptor-d1695.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:652588387791:android:c2a2fea09ccc5934",
+        "mobilesdk_app_id": "1:264849437645:android:c2a2fea09ccc5934",
         "android_client_info": {
           "package_name": "com.example.felipebarino.firebaseauthdemo"
         }
       },
       "oauth_client": [
         {
-          "client_id": "652588387791-e0d1qnp18q1eipi6bf6k4pmv2uvv2vbm.apps.googleusercontent.com",
+          "client_id": "264849437645-ub9uk75qtccr07k2r4dj68qntoencjse.apps.googleusercontent.com",
           "client_type": 3
         },
         {
-          "client_id": "652588387791-e0d1qnp18q1eipi6bf6k4pmv2uvv2vbm.apps.googleusercontent.com",
+          "client_id": "264849437645-ub9uk75qtccr07k2r4dj68qntoencjse.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCpxG_EhrjlMLbJ18OJspbCWzSSsZxI4Qs"
+          "current_key": "AIzaSyAhczLDXFvfrzKCBqty-FGqcstRDQ-GBJ0"
         }
       ],
       "services": {

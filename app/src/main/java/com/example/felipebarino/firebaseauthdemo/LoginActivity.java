@@ -21,8 +21,10 @@ import com.google.firebase.auth.FirebaseAuth;
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
 
     private Button buttonSignIn;
+
     private EditText editTextEmail;
     private EditText editTextPassword;
+
     private TextView textViewSignup;
 
     private ProgressDialog progressDialog;
@@ -35,10 +37,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
 
         firebaseAuth = FirebaseAuth.getInstance();
-
+        // Se já houver usuário logado, pular parte de Registro ou Logar
         if(firebaseAuth.getCurrentUser() != null){
             finish();
-            startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+            startActivity(new Intent(getApplicationContext(), PrimaryActivity.class));
         }
 
         progressDialog = new ProgressDialog(this);
@@ -66,7 +68,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return;
         }
 
-        progressDialog.setMessage("Registrando usuário...");
+        progressDialog.setMessage("Entrando na conta...");
         progressDialog.show();
 
         firebaseAuth.signInWithEmailAndPassword(email, password)
@@ -77,7 +79,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                         if(task.isSuccessful()){
                             finish();
-                            startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+                            startActivity(new Intent(getApplicationContext(), PrimaryActivity.class));
                         }else{
                             Log.w("LoginActivity", "UserLogin:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Falha ao fazer Login", Toast.LENGTH_SHORT).show();

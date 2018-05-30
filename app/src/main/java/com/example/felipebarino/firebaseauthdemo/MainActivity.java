@@ -17,17 +17,28 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button buttonRegister;
+
+    private EditText editTextName;
+    private EditText editTextLastname;
     private EditText editTextEmail;
     private EditText editTextPassword;
-    private TextView textViewSignin;
 
+    private TextView textViewSignin;
     private ProgressDialog progressDialog;
 
     private FirebaseAuth firebaseAuth;
+    private DatabaseReference databaseReference;
+    private DatabaseReference userDatabase;
+    private FirebaseUser user;
+
+    public UserInformation userInformation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,26 +47,72 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         firebaseAuth = FirebaseAuth.getInstance();
 
+        // Se já houver usuário logado, pular parte de Registro ou Logar
         if(firebaseAuth.getCurrentUser() != null){
             finish();
-            startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+            startActivity(new Intent(getApplicationContext(), PrimaryActivity.class));
         }
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
 
         progressDialog = new ProgressDialog(this);
 
         buttonRegister = (Button) findViewById(R.id.buttonRegister);
+
+        editTextName = (EditText) findViewById(R.id.editTextName);
+        editTextLastname = (EditText) findViewById(R.id.editTextLastname);
         editTextEmail = (EditText) findViewById(R.id.editTextEmail);
         editTextPassword = (EditText) findViewById(R.id.editTextPassword);
+
         textViewSignin = (TextView) findViewById(R.id.textViewSignin);
 
         buttonRegister.setOnClickListener(this);
         textViewSignin.setOnClickListener(this);
     }
 
-    private void registerUser(){
-        String email = editTextEmail.getText().toString().trim();
-        String password = editTextPassword.getText().toString().trim();
+    private void saveUserInformation(final UserInformation userInformation, String email, String password){
+        // Pegar o nome e sobrenome
+        String name = userInformation.getName();
+        String lastname = userInformation.getLastname();
 
+        // se não for vazio -> salva no banco de dados
+        if( !(TextUtils.isEmpty(name) && TextUtils.isEmpty(lastname)) ) {
+            //tenta fazer log in
+            // *** falta fazer Toast expecifico para cada tipo de erro que pode ocorrer
+            firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(task.isSuccessful()){
+                                // salva nome e sobrenome no banco de dados
+                                // pega quem é o usuário logado
+                                FirebaseUser user = firebaseAuth.getCurrentUser();
+                                // seta as informações para ele
+                                userDatabase = databaseReference.child(user.getUid());
+                                userDatabase.setValue(userInformation);
+                                Log.d("MainActivity", "userRegistration:added");
+                                // vai para a atividade primária
+                                finish();
+                                startActivity(new Intent(getApplicationContext(), PrimaryActivity.class));
+                            }else{
+                                if(progressDialog.isShowing()) progressDialog.dismiss();
+                                Log.w("MainActivity", "UserLogin:failure", task.getException());
+                                Toast.makeText(MainActivity.this, "Falha ao fazer Login", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }else{
+            Toast.makeText(this, "Digite um nome e sobrenome", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void registerUser(){
+        // pega email e senha
+        final String email = editTextEmail.getText().toString().trim();
+        final String password = editTextPassword.getText().toString().trim();
+        userInformation = new UserInformation( editTextName.getText().toString().trim(), editTextLastname.getText().toString().trim());
+
+        // checa se estão vazios
         if(TextUtils.isEmpty(email)) {
             Toast.makeText(this, "Digite o endereço de e-mail", Toast.LENGTH_SHORT).show();
             return;
@@ -64,21 +121,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "Digite a senha", Toast.LENGTH_SHORT).show();
             return;
         }
+
         progressDialog.setMessage("Registrando usuário...");
         progressDialog.show();
-
+        // registra o usuário
+        // *** falta fazer Toast expecifico para cada tipo de erro que pode ocorrer
         firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
                             if(progressDialog.isShowing()) progressDialog.dismiss();
-                            Toast.makeText(MainActivity.this, "Usuário registrado com sucesso.", Toast.LENGTH_SHORT).show();
-                            finish();
-                            startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                            Log.d("MainActivity", "createUser:success");
+                            saveUserInformation(userInformation, email, password);
                         }else{
                             if(progressDialog.isShowing()) progressDialog.dismiss();
-                            Log.w("MainActivity", "signInAnonymously:failure", task.getException());
+                            Log.w("MainActivity", "createUser:failure", task.getException());
                             Toast.makeText(MainActivity.this, "Registo falhou, tente novamente.", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -92,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             registerUser();
         }
         if(view == textViewSignin){
-            // tela de logar
+            // Vai pra tela de log in
             finish();
             startActivity(new Intent(this, LoginActivity.class));
         }
