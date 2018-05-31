@@ -34,7 +34,6 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
     private DatabaseReference databaseReference, userDatabase, infoDatabase, devicesDatabase;
 
     private UserInformation userInformation;
-    private UserDevice userDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +69,6 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
         devicesDatabase = userDatabase.child("devices");
 
         userInformation = new UserInformation("name", "lastname");
-        userDevice = new UserDevice("000","nick", "OFF");
 
         // callback para mudanças nas informações do usuário
         infoDatabase.addValueEventListener(new ValueEventListener() {
@@ -80,7 +78,9 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
                 userInformation.setName(dataSnapshot.child("name").getValue().toString().trim());
                 userInformation.setLastname(dataSnapshot.child("lastname").getValue().toString().trim());
                 Log.d("PrimaryActivity:\t", "onDataChange:\n\r\tname:\t\t" +
-                        dataSnapshot.child("name").getValue().toString().trim() + " \n\r\tlastname:\t" + dataSnapshot.child("lastname").getValue().toString().trim());
+                        dataSnapshot.child("name").getValue().toString().trim() + "==" + userInformation.getName()
+                        + " \n\r\tlastname:\t" + dataSnapshot.child("lastname").getValue().toString().trim()+ "==" + userInformation.getName());
+
                 textViewUser = (TextView) findViewById(R.id.textViewUser);
                 textViewUser.setText("Olá, " + userInformation.getName() );
             }
@@ -96,6 +96,7 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // quando atualiza as informações de dispositivos
+
             }
 
             @Override
@@ -103,6 +104,8 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
                 Log.e("PrimaryActivity:\t", "devicesDatabase: onDataChange:\n\rcould not get new data");
             }
         });
+
+
     }
 
 

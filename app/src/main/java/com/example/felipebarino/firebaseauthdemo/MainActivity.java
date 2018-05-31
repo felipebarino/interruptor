@@ -38,10 +38,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
-    private DatabaseReference infoDatabase;
     private FirebaseUser user;
 
     public UserInformation userInformation;
+    public Device userDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +71,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         buttonRegister.setOnClickListener(this);
         textViewSignin.setOnClickListener(this);
+
+        userDevice = new Device("init");
     }
 
-    private void saveUserInformation(final UserInformation userInformation, String email, String password){
+    private void saveUserInformation(String email, String password){
         // Pegar o nome e sobrenome
         String name = userInformation.getName();
         String lastname = userInformation.getLastname();
@@ -90,9 +92,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 // pega quem é o usuário logado
                                 FirebaseUser user = firebaseAuth.getCurrentUser();
                                 // seta as informações para ele
-                                infoDatabase = databaseReference.child(user.getUid()).child("info");
+                                DatabaseReference infoDatabase = databaseReference.child(user.getUid()).child("info");
                                 // salva nome e sobrenome no banco de dados
                                 infoDatabase.setValue(userInformation);
+
+                                // cria o nó de dispositivos, com um genérico que indica vazio
+                                DatabaseReference devicesDatabase = databaseReference.child(user.getUid()).child("devices");
+                                String id = "0000";
+                                devicesDatabase.child(id).setValue(userDevice);
+
                                 Log.d("MainActivity", "UserLogin: success");
                                 // vai para a atividade primária
                                 finish();
@@ -113,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final String email = editTextEmail.getText().toString().trim();
         final String password = editTextPassword.getText().toString().trim();
         userInformation = new UserInformation( editTextName.getText().toString().trim(), editTextLastname.getText().toString().trim());
+        userDevice = new Device("inicial");
 
         // checa se estão vazios
         if(TextUtils.isEmpty(email)) {
@@ -135,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             if(progressDialog.isShowing()) progressDialog.dismiss();
                             Log.d("MainActivity", "createUser:success");
                             // salva as informações no banco de dados
-                            saveUserInformation(userInformation, email, password);
+                            saveUserInformation(email, password);
                         }else{
                             if(progressDialog.isShowing()) progressDialog.dismiss();
                             Log.w("MainActivity", "createUser:failure", task.getException());
