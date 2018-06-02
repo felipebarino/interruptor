@@ -13,9 +13,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CompoundButton;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,14 +29,14 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PrimaryActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class DeleteDeviceActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     private NavigationView navigationView;
 
     private TextView textViewUser;
-    private ListView listView;
+    private ListView listViewDelete;
 
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
@@ -49,12 +48,12 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_primary);
+        setContentView(R.layout.activity_delete_device);
 
         devices = new ArrayList<Device>();
         devices.clear();
 
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout3);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close);
 
         drawerLayout.addDrawerListener(drawerToggle);
@@ -64,9 +63,9 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        listView = (ListView) findViewById(R.id.listview);
+        listViewDelete = (ListView) findViewById(R.id.listviewDelete);
         final CustomAdaptor customAdaptor = new CustomAdaptor();
-        listView.setAdapter(customAdaptor);
+        listViewDelete.setAdapter(customAdaptor);
 
         // instancia o autorizador do firebase e vê se tem alguém logado
         // se não, vai pra tela de login
@@ -93,9 +92,9 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
                 // quando atualiza as informações do usuário
                 userInformation.setName(dataSnapshot.child("name").getValue().toString().trim());
                 userInformation.setLastname(dataSnapshot.child("lastname").getValue().toString().trim());
-                Log.d("PrimaryActivity:\t", "onDataChange:\n\r\tname:\t\t" +
+                Log.d("DeleteActivity:\t", "onDataChange:\n\r\tname:\t\t" +
                         dataSnapshot.child("name").getValue().toString().trim() + "==" + userInformation.getName()
-                        + " \n\r\tlastname:\t" + dataSnapshot.child("lastname").getValue().toString().trim()+ "==" + userInformation.getLastname());
+                        + " \n\r\tlastname:\t" + dataSnapshot.child("lastname").getValue().toString().trim()+ "==" + userInformation.getName());
 
                 textViewUser = (TextView) findViewById(R.id.textViewUser);
                 textViewUser.setText("Olá, " + userInformation.getName());
@@ -103,7 +102,7 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("PrimaryActivity:\t", "infoDatabase: onDataChange:\n\rcould not get new data");
+                Log.e("DeleteActivity:\t", "infoDatabase: onDataChange:\n\rcould not get new data");
             }
         });
 
@@ -112,7 +111,7 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // quando atualiza as informações de dispositivos
-                Log.d("PrimaryActivity: " ,"devicesDatabase: onDataChange: \n\tcount "+
+                Log.d("DeleteActivity: " ,"devicesDatabase: onDataChange: \n\tcount "+
                         dataSnapshot.getChildrenCount());
 
                 devices.clear();
@@ -125,16 +124,6 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
                         // pega o dispositivo
                         Device post = postSnapshot.getValue(Device.class);
                         devices.add(post);
-                        /*
-                        // procura nos dispositivos locais
-                        for(int k = 0; k < devices.size(); k++){
-                            // se for novo, adiciona
-                            if (post.getId() != devices.get(k).getId()){
-                                // salva localmente numa lista de dispositivos
-                                devices.add(post);
-                            }
-                        }
-                        */
                     }
                 }
 
@@ -143,16 +132,17 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("PrimaryActivity:\t", "devicesDatabase: onDataChange:\n\rcould not get new data");
+                Log.e("DeleteActivity:\t", "devicesDatabase: onDataChange:\n\rcould not get new data");
             }
         });
+
     }
 
     class CustomAdaptor extends BaseAdapter {
 
         @Override
         public int getCount() {
-            Log.d("PrimaryActivity: ", "CustomAdaptor: getCount:" +
+            Log.d("DeleteActivity: ", "CustomAdaptor: getCount:" +
                     String.valueOf(devices.size()));
             if (devices.size() == 0){
                 return 1;
@@ -174,28 +164,24 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
         @Override
         public View getView(final int position, View view, ViewGroup viewGroup) {
             if(devices.size()>0) {
-                view = getLayoutInflater().inflate(R.layout.custom_layout, null);
+                view = getLayoutInflater().inflate(R.layout.custom_layout_delete, null);
 
-                TextView textView_nick = (TextView) view.findViewById(R.id.textView_nick);
-                Switch switch_onOff = (Switch) view.findViewById(R.id.switch_onOff);
+                TextView textView_nick = (TextView) view.findViewById(R.id.textView_nick_delete);
+                Button buttonDelete = (Button) view.findViewById(R.id.buttonDelete);
 
-                Log.d("PrimaryActivity: ", "CustomAdaptor: getView: position: " +
+                Log.d("DeleteActivity: ", "CustomAdaptor: delete: position: " +
                         String.valueOf(position) + ": " + String.valueOf(devices.get(position).getNick()));
 
                 textView_nick.setText(devices.get(position).getNick());
 
-                switch_onOff.setChecked(devices.get(position).isOn());
-
-                switch_onOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                buttonDelete.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (devices.get(position).isOn()) {
-                            devices.get(position).turnOff();
-                        } else {
-                            devices.get(position).turnOn();
-                        }
-                        buttonView.setChecked(isChecked);
-                        devicesDatabase.child(devices.get(position).getId()).setValue(devices.get(position));
+                    public void onClick(View view) {
+                        // deleta do banco de dados
+                        devicesDatabase.child( devices.get(position).getId() ).removeValue();
+
+                        Toast.makeText(DeleteDeviceActivity.this, "Dispositivo deletado", Toast.LENGTH_SHORT).show();
+
                     }
                 });
 
@@ -205,8 +191,6 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
 
                 textView_noDevice.setText("Ainda não há dispositivos cadastrados.");
             }
-
-
             return view;
         }
     }
@@ -226,7 +210,8 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
 
         if(id == R.id.nav_init)
         {
-            // já está
+            finish();
+            startActivity(new Intent(this, PrimaryActivity.class));
         }
         if(id == R.id.nav_account)
         {

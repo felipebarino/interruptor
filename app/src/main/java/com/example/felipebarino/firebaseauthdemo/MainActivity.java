@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buttonRegister.setOnClickListener(this);
         textViewSignin.setOnClickListener(this);
 
-        userDevice = new Device("init");
+        userDevice = new Device();
     }
 
     private void saveUserInformation(String email, String password){
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                                 // cria o nó de dispositivos, com um genérico que indica vazio
                                 DatabaseReference devicesDatabase = databaseReference.child(user.getUid()).child("devices");
-                                String id = "0000";
+                                String id = userDevice.getId();
                                 devicesDatabase.child(id).setValue(userDevice);
 
                                 Log.d("MainActivity", "UserLogin: success");
@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final String email = editTextEmail.getText().toString().trim();
         final String password = editTextPassword.getText().toString().trim();
         userInformation = new UserInformation( editTextName.getText().toString().trim(), editTextLastname.getText().toString().trim());
-        userDevice = new Device("inicial");
+        userDevice = new Device();
 
         // checa se estão vazios
         if(TextUtils.isEmpty(email)) {

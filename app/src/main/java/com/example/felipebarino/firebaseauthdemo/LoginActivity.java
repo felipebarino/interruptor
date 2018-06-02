@@ -18,7 +18,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button buttonSignIn;
 
@@ -26,6 +26,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText editTextPassword;
 
     private TextView textViewSignup;
+    private TextView textViewResetPassword;
 
     private ProgressDialog progressDialog;
 
@@ -38,7 +39,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         firebaseAuth = FirebaseAuth.getInstance();
         // Se já houver usuário logado, pular parte de Registro ou Logar
-        if(firebaseAuth.getCurrentUser() != null){
+        if (firebaseAuth.getCurrentUser() != null) {
             finish();
             startActivity(new Intent(getApplicationContext(), PrimaryActivity.class));
         }
@@ -49,21 +50,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         editTextEmail = (EditText) findViewById(R.id.editTextEmail);
         editTextPassword = (EditText) findViewById(R.id.editTextPassword);
         textViewSignup = (TextView) findViewById(R.id.textViewSignup);
+        textViewResetPassword = (TextView) findViewById(R.id.textViewResetPassword);
 
         buttonSignIn.setOnClickListener(this);
         textViewSignup.setOnClickListener(this);
+        textViewResetPassword.setOnClickListener(this);
 
     }
 
-    private void userLogin(){
+    private void userLogin() {
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
-        if(TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(email)) {
             Toast.makeText(this, "Digite o endereço de e-mail", Toast.LENGTH_SHORT).show();
             return;
         }
-        if(TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(password)) {
             Toast.makeText(this, "Digite a senha", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -77,24 +80,44 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         progressDialog.dismiss();
 
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             finish();
                             startActivity(new Intent(getApplicationContext(), PrimaryActivity.class));
-                        }else{
+                        } else {
                             Log.w("LoginActivity", "UserLogin:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Falha ao entrar", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
+
     @Override
     public void onClick(View view) {
-        if(view == buttonSignIn){
+        if (view == buttonSignIn) {
             userLogin();
         }
-        if(view == textViewSignup){
+        if (view == textViewSignup) {
             finish();
             startActivity(new Intent(this, MainActivity.class));
         }
+        if (view == textViewResetPassword) {
+            String email = editTextEmail.getText().toString().trim();
+            if (email == null) {
+                Toast.makeText(LoginActivity.this, "Digite seu E-mail cadastrado.", Toast.LENGTH_SHORT).show();
+            } else {
+                FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(LoginActivity.this, "E-mail enviado.", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(LoginActivity.this, "Falha ao enviar E-mail", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+            }
+        }
     }
 }
+

@@ -1,17 +1,13 @@
 package com.example.felipebarino.firebaseauthdemo;
 
-import android.text.TextUtils;
-
 public class Device{
-
+    private String id;
     private String nick;
-    private String state;
+    private boolean on;
 
-    private String on = "ON";
-    private String off = "OFF";
-
-    public Device(String nick){
-        this.nick = nick;
+    public Device(){
+        this.id = "0000";
+        this.nick = "inicial";
         this.turnOff();
     }
 
@@ -23,24 +19,24 @@ public class Device{
         this.nick = nick;
     }
 
-    public void setState(String state) {
-        this.state = state;
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void turnOn() {
-        setState(this.on);
+        this.on = true;
     }
 
     public void turnOff() {
-        setState(this.off);
+        this.on = false;
     }
 
     public boolean isOn() {
-        if(TextUtils.equals(this.state, this.on)){
-            return true;
-        }else if (TextUtils.equals(this.state, this.off)){
-            return false;
-        }else return false;
+        return this.on;
     }
 
 }
