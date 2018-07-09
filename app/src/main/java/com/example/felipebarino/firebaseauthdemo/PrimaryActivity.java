@@ -17,7 +17,6 @@ import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -230,7 +229,7 @@ public class PrimaryActivity extends AppCompatActivity implements NavigationView
         }
         if(id == R.id.nav_account)
         {
-            Toast.makeText(this, "Minha conta", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, MyAccount.class));
         }
         if(id == R.id.nav_settings)
         {

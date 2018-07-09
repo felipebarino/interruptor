@@ -215,7 +215,8 @@ public class DeleteDeviceActivity extends AppCompatActivity implements Navigatio
         }
         if(id == R.id.nav_account)
         {
-            Toast.makeText(this, "Minha conta", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, MyAccount.class));
+
         }
         if(id == R.id.nav_settings)
         {

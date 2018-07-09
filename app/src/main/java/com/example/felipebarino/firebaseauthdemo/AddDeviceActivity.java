@@ -57,6 +57,7 @@ public class AddDeviceActivity extends AppCompatActivity implements View.OnClick
         userDatabase = databaseReference.child(user.getUid());
         infoDatabase = userDatabase.child("info");
         devicesDatabase = userDatabase.child("devices");
+
     }
 
     @Override
@@ -95,7 +96,8 @@ public class AddDeviceActivity extends AppCompatActivity implements View.OnClick
         }
         if(id == R.id.nav_account)
         {
-            Toast.makeText(this, "Minha conta", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, MyAccount.class));
+
         }
         if(id == R.id.nav_settings)
         {

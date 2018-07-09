@@ -22,7 +22,8 @@
         <activity android:name=".PrimaryActivity" />
         <activity android:name=".ConfigurationsActivity" />
         <activity android:name=".AddDeviceActivity" />
-        <activity android:name=".DeleteDeviceActivity"></activity>
+        <activity android:name=".DeleteDeviceActivity" />
+        <activity android:name=".MyAccount"></activity>
     </application>
 
 </manifest>

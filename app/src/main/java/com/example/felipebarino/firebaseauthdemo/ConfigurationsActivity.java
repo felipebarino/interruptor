@@ -11,22 +11,33 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class ConfigurationsActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
+    private DatabaseReference databaseReference, userDatabase, infoDatabase, devicesDatabase;
 
     private Button buttonAddDevice;
     private Button buttonDeleteDevice;
 
+    private TextView textViewUser;
+
     private DrawerLayout drawerLayout2;
     private ActionBarDrawerToggle drawerToggle;
     private NavigationView navigationView;
+
+    private UserInformation userInformation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +67,35 @@ public class ConfigurationsActivity extends AppCompatActivity implements View.On
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // pega o banco de dados
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+        // pega o banco de dados do usuário, informações e dispositivos
+        userDatabase = databaseReference.child(user.getUid());
+        infoDatabase = userDatabase.child("info");
+        devicesDatabase = userDatabase.child("devices");
+        userInformation = new UserInformation("name", "lastname");
+
+        // callback para mudanças nas informações do usuário
+        infoDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // quando atualiza as informações do usuário
+                userInformation.setName(dataSnapshot.child("name").getValue().toString().trim());
+                userInformation.setLastname(dataSnapshot.child("lastname").getValue().toString().trim());
+                Log.d("PrimaryActivity:\t", "onDataChange:\n\r\tname:\t\t" +
+                        dataSnapshot.child("name").getValue().toString().trim() + "==" + userInformation.getName()
+                        + " \n\r\tlastname:\t" + dataSnapshot.child("lastname").getValue().toString().trim()+ "==" + userInformation.getLastname());
+
+                textViewUser = (TextView) findViewById(R.id.textViewUser);
+                textViewUser.setText("Olá, " + userInformation.getName());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("PrimaryActivity:\t", "infoDatabase: onDataChange:\n\rcould not get new data");
+            }
+        });
 
     }
 
@@ -92,7 +132,7 @@ public class ConfigurationsActivity extends AppCompatActivity implements View.On
         }
         if(id == R.id.nav_account)
         {
-            Toast.makeText(this, "Minha conta", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, MyAccount.class));
         }
         if(id == R.id.nav_settings)
         {
